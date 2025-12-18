@@ -1,1 +1,93 @@
-正在启动中…… :(
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文天玩WenTianPlay | 问答官网</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f8f9fa; color: #333; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #4a6fa5; }
+        h1 { color: #2c3e50; font-size: 2.2em; margin-bottom: 8px; }
+        .subtitle { color: #7f8c8d; font-size: 0.95em; margin-bottom: 30px; }
+        .qna-list { display: flex; flex-direction: column; gap: 16px; }
+        .qna-item { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+        .toggle { display: none; }
+        .title { display: block; padding: 20px; font-size: 1.1em; font-weight: bold; color: #2c3e50; cursor: pointer; background: #fff; transition: background 0.2s; position: relative; border-left: 4px solid #4a6fa5; }
+        .title:hover { background: #f1f7ff; }
+        .title::after { content: "▶"; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 0.8em; color: #7f8c8d; transition: transform 0.3s; }
+        .toggle:checked + .title::after { transform: translateY(-50%) rotate(90deg); }
+        .detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: #fefefe; }
+        .toggle:checked ~ .detail { max-height: 500px; }
+        .detail p { padding: 0 20px 20px 20px; color: #555; white-space: pre-line; }
+        .loading { text-align: center; padding: 40px; color: #7f8c8d; }
+        .error { background: #ffeaea; color: #c33; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+        footer { margin-top: 50px; text-align: center; color: #95a5a6; font-size: 0.9em; padding-top: 20px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>文天玩WenTianPlay | 问答官网</h1>
+        <div class="subtitle">常见问题解答 • 最后更新：<span id="updateDate"></span></div>
+    </header>
+
+    <main>
+        <div id="qnaContainer" class="qna-list"></div>
+        <div id="loading" class="loading">正在加载问答数据...</div>
+        <div id="error" class="error" style="display:none;"></div>
+    </main>
+
+    <footer>
+        <p>文天玩WenTianPlay 提供技术支持 • 2024年5月3日</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('qnaContainer');
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const updateDate = document.getElementById('updateDate');
+
+            fetch('./index.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('配置加载失败');
+                    return response.json();
+                })
+                .then(config => {
+                    updateDate.textContent = config.lastUpdated || '2025-03-31';
+                    return fetch(config.dataUrl);
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('数据加载失败');
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (!Array.isArray(data) || data.length === 0) {
+                        throw new Error('数据格式不正确或为空');
+                    }
+                    
+                    data.forEach((item, index) => {
+                        const section = document.createElement('section');
+                        section.className = 'qna-item';
+                        const id = `qna${index + 1}`;
+                        
+                        section.innerHTML = `
+                            <input type="checkbox" id="${id}" class="toggle">
+                            <label class="title" for="${id}">${item.question || '问题未提供'}</label>
+                            <div class="detail">
+                                <p>${item.answer || '答案未提供'}</p>
+                            </div>
+                        `;
+                        container.appendChild(section);
+                    });
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    errorDiv.textContent = `加载失败：${error.message}。请检查网络连接或联系管理员。`;
+                    errorDiv.style.display = 'block';
+                });
+        });
+    </script>
+</body>
+</html>
