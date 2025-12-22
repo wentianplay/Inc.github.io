@@ -40,8 +40,8 @@ footer{margin-top:4rem;text-align:center;color:#a0aec0;font-size:0.95rem;padding
 <body>
 <div class="container">
 <header>
-<h1 class="logo">文天玩WenTianPlay</h1>
-<div class="subtitle">智慧问答 • 专业解答 • 持续更新</div>
+<h1 class="logo"><a href="https://www.wentianplay.cn/">文天玩WenTianPlay</a></h1>
+<div class="subtitle"><a hmailto:support@wentianplay.com?subject=问题反馈&body=问题：%0D%0A内容：">support@wentianplay.com</a></div>
 <div class="update-date">最后更新：<span id="updateDate">2025-03-31</span></div>
 </header>
 <main>
@@ -59,9 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const loading = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
     const updateDate = document.getElementById('updateDate');
-
-    // 先加载本地配置文件
-    fetch('./index.json')
+    fetch('index.json')
         .then(response => {
             if (!response.ok) throw new Error('配置加载失败: ' + response.status);
             return response.json();
@@ -69,8 +67,6 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(config => {
             updateDate.textContent = config.lastUpdated || '2025-03-31';
             console.log('配置加载成功，数据源:', config.dataUrl);
-            
-            // 加载远程数据
             return fetch(config.dataUrl);
         })
         .then(response => {
@@ -89,13 +85,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 container.innerHTML = '<div class="error">暂无问答数据</div>';
                 return;
             }
-            
-            // 生成问答内容
             data.forEach((item, index) => {
                 const section = document.createElement('section');
                 section.className = 'qna-item';
                 const id = `qna${index + 1}`;
-                
                 section.innerHTML = `
                     <input type="checkbox" id="${id}" class="toggle">
                     <label class="title" for="${id}">${item.question || '问题未提供'}</label>
@@ -113,12 +106,10 @@ document.addEventListener("DOMContentLoaded", function() {
             loading.style.display = 'none';
             errorDiv.textContent = `加载失败：${error.message}。请检查网络连接或联系管理员。`;
             errorDiv.style.display = 'block';
-            
-            // 显示示例数据作为后备
             const fallbackData = [
                 {
-                    question: "示例问题：如何联系客服？",
-                    answer: "示例答案：您可以通过官方邮箱 support@wentianplay.com 或在线客服系统联系我们。"
+                    question: "如何联系客服？",
+                    answer: "您可以通过官方邮箱 support@wentianplay.com 或在线客服系统联系我们。"
                 }
             ];
             
